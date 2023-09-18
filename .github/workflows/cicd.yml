@@ -3,8 +3,8 @@ name: Build and Deploy
 on:
   push:
     tags: ["v[0-9].[0-9]+.[0-9]+"]
-    paths:
-      - 'terraform'
+    # paths:
+    #   - 'terraform'
     branches:
       # - "development"
       # - "staging"

@@ -5,6 +5,7 @@ variable "ami_id" {
 
 variable "efs_mount_point" {
   type    = string
+  // fs-07e6241ae6cd706b1.efs.us-west-2.amazonaws.com
   default = ""
 }
 

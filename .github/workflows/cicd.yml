@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   Terraform-stack-IAM:
-    name: Terraform_job
+    name: Terraform_stack_IAM
     runs-on: ubuntu-latest
     environment: test
     defaults:

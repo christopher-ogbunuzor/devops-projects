@@ -1,4 +1,4 @@
-## Project Course
+# HIGHLY AVAILABLE FAULT TOLERANT JENKINS SETUP
 
 Detailed Video/Walkthrough Course: [techiescamp.com/courses/deploying-jenkins-aws/](https://techiescamp.com/courses/deploying-jenkins-aws/
 )
@@ -11,3 +11,10 @@ Detailed Video/Walkthrough Course: [techiescamp.com/courses/deploying-jenkins-aw
 ## Project Documentation.
 
 Refer [Jenkins Setup Using AWS Autoscaling Group](https://devopscube.com/jenkins-autoscaling-setup/) for the entire setup walkthrough.
+
+## User Guide
+- ensure default vpc exists in AWS region
+
+The terraform deployment is laid down in the following order
+- IAM role
+- EFS

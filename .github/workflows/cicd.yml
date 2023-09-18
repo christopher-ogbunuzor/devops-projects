@@ -24,57 +24,13 @@ permissions:
 
 
 jobs:
-  Packer_build_AMI_Job: 
-    name: Packer_build_AMI_Job
-    runs-on: ubuntu-latest
-    environment: test
-    outputs:
-      iteration_id: ${{ steps.hcp.outputs.iteration_id }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-west-1
-
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Packer Init
-        run: packer init .
-
-      - name: Packer Build
-        if: "startsWith(github.ref, 'refs/heads/')"
-        run: packer build .
-
-      # - name: Packer Build - Tags
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   run: HCP_PACKER_BUILD_FINGERPRINT=$(date +'%m%d%YT%H%M%S') packer build .
-
-      # - name: Get HCP Packer Iteration ID from Packer Manifest
-      #   id: hcp
-      #   run: |
-      #     last_run_uuid=$(jq -r '.last_run_uuid' "./packer_manifest.json")
-      #     build=$(jq -r '.builds[] | select(.packer_run_uuid == "'"$last_run_uuid"'")' "./packer_manifest.json")
-      #     iteration_id=$(echo "$build" | jq -r '.custom_data.iteration_id')
-      #     echo "::set-output name=iteration_id::$iteration_id"
-  Terraform_job:
+  Terraform-stack-IAM:
     name: Terraform_job
-    needs: ["Packer_build_AMI_Job"]
     runs-on: ubuntu-latest
     environment: test
     defaults:
       run:
-        working-directory: terraform
+        working-directory: 01-jenkins-setup/terraform/iam
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -103,6 +59,86 @@ jobs:
         id: apply
         run: terraform apply --auto-approve
         continue-on-error: false
+
+  # Packer_build_AMI_Job: 
+  #   name: Packer_build_AMI_Job
+  #   runs-on: ubuntu-latest
+  #   environment: test
+  #   outputs:
+  #     iteration_id: ${{ steps.hcp.outputs.iteration_id }}
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v3
+
+  #     # - name: Configure AWS Credentials
+  #     #   uses: aws-actions/configure-aws-credentials@v1
+  #     #   with:
+  #     #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     #     aws-region: us-west-1
+
+  #     - name: Authenticate with AWS
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+  #         role-session-name: new_github_oidc_role_session
+  #         # aws-region: ${{ env.AWS_REGION }}
+  #         aws-region: ${{ vars.AWS_REGION }}
+
+  #     - name: Packer Init
+  #       run: packer init .
+
+  #     - name: Packer Build
+  #       if: "startsWith(github.ref, 'refs/heads/')"
+  #       run: packer build .
+
+  #     # - name: Packer Build - Tags
+  #     #   if: startsWith(github.ref, 'refs/tags/v')
+  #     #   run: HCP_PACKER_BUILD_FINGERPRINT=$(date +'%m%d%YT%H%M%S') packer build .
+
+  #     # - name: Get HCP Packer Iteration ID from Packer Manifest
+  #     #   id: hcp
+  #     #   run: |
+  #     #     last_run_uuid=$(jq -r '.last_run_uuid' "./packer_manifest.json")
+  #     #     build=$(jq -r '.builds[] | select(.packer_run_uuid == "'"$last_run_uuid"'")' "./packer_manifest.json")
+  #     #     iteration_id=$(echo "$build" | jq -r '.custom_data.iteration_id')
+  #     #     echo "::set-output name=iteration_id::$iteration_id"
+  # Terraform-job2:
+  #   name: Terraform_job
+  #   needs: ["Packer_build_AMI_Job"]
+  #   runs-on: ubuntu-latest
+  #   environment: test
+  #   defaults:
+  #     run:
+  #       working-directory: terraform
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Authenticate with AWS
+  #       uses: aws-actions/configure-aws-credentials@v2
+  #       with:
+  #         role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+  #         role-session-name: new_github_oidc_role_session
+  #         # aws-region: ${{ env.AWS_REGION }}
+  #         aws-region: ${{ vars.AWS_REGION }}
+
+  #     - name: Terraform setup
+  #       uses: hashicorp/setup-terraform@v1
+        
+  #     - name: Init
+  #       id: init
+  #       run: terraform init
+
+  #     - name: Plan
+  #       id: plan
+  #       run: terraform plan 
+  #       continue-on-error: false
+
+  #     - name: Apply
+  #       id: apply
+  #       run: terraform apply --auto-approve
+  #       continue-on-error: false
 
 
      

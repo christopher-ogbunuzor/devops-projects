@@ -108,7 +108,7 @@ jobs:
 
   Packer-Jenkins-controller: 
     name: Packer_Jenkins_controller
-    needs: ["Terraform_stack_EFS"]
+    needs: ["Terraform-stack-EFS"]
     runs-on: ubuntu-latest
     defaults:
       run:

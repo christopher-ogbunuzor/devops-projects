@@ -60,6 +60,43 @@ jobs:
         run: terraform apply --auto-approve
         continue-on-error: false
 
+  Terraform-stack-EFS:
+    name: Terraform_stack_EFS
+    runs-on: ubuntu-latest
+    environment: test
+    defaults:
+      run:
+        working-directory: 01-jenkins-setup/terraform/efs
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate with AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+          role-session-name: new_github_oidc_role_session
+          # aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform setup
+        uses: hashicorp/setup-terraform@v1
+        
+      - name: Init
+        id: init
+        run: terraform init
+
+      - name: Plan
+        id: plan
+        run: terraform plan 
+        continue-on-error: false
+
+      - name: Apply
+        id: apply
+        run: terraform apply --auto-approve
+        continue-on-error: false
+
+
   # Packer_build_AMI_Job: 
   #   name: Packer_build_AMI_Job
   #   runs-on: ubuntu-latest

@@ -103,7 +103,7 @@ jobs:
       - name: EFS_DNS_NAME
         id: efs_dns_name
         run: |
-          echo "EFS_DNS_NAME=$(terraform output efs_dns_name -raw efs_dns_name)" >> $GITHUB_OUTPUT
+          echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
         continue-on-error: false
 
   Packer-Jenkins-controller: 

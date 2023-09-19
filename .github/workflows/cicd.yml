@@ -151,8 +151,14 @@ jobs:
           echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
 
       - name: Packer Init
-        if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'yes'
-        run: packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+        # if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
+        run: |
+          if ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'yes'; then
+            echo "AMI already exist so I wont run packer init"
+          else
+            echo "I AM ABOUT TO RUN packer init"
+            # packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+          fi
 
       # - name: Packer Build
       #   if: "startsWith(github.ref, 'refs/heads/')"

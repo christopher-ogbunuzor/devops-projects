@@ -259,17 +259,17 @@ jobs:
           fi
 
       - name: Retrieve packer AMI ID
-          id: get_ami_id_and_region
-          run: |
-            if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-              echo "Agent AMI already exist so I wont retrieve AMI id and region"
-            else
-              echo "I AM ABOUT TO RUN retrieve AMI id and region"
-              # ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)
-              # region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)
-              echo "agent_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
-              echo "agent_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
-            fi
+        id: get_ami_id_and_region
+        run: |
+          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+            echo "Agent AMI already exist so I wont retrieve AMI id and region"
+          else
+            echo "I AM ABOUT TO RUN retrieve AMI id and region"
+            # ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)
+            # region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)
+            echo "agent_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
+            echo "agent_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
+          fi
 
   # Terraform-job2:
   #   name: Terraform_job

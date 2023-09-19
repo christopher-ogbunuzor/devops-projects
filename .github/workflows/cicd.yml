@@ -63,8 +63,8 @@ jobs:
   Terraform-stack-EFS:
     name: Terraform_stack_EFS
     runs-on: ubuntu-latest
-    # outputs:
-    #   efs_dns_name: steps.
+    outputs:
+      efs_dns_name_mount: ${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}
     environment: test
     defaults:
       run:
@@ -103,7 +103,10 @@ jobs:
       - name: EFS_DNS_NAME
         id: efs_dns_name
         run: |
-          echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
+          EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
+          echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
+          # echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
+          echo "$EFS_DNS_NAME"
         continue-on-error: false
 
   Packer-Jenkins-controller: 
@@ -128,11 +131,13 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Packer Init
-        run: packer init -var "efs_mount_point=${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}" jenkins-controller.pkr.hcl
+        run: |
+          echo $EFS_DNS_NAME
+          packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
       - name: Packer Build
         if: "startsWith(github.ref, 'refs/heads/')"
-        run: packer build -var "efs_mount_point=${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}" jenkins-controller.pkr.hcl
+        run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
       # - name: Packer Build - Tags
       #   if: startsWith(github.ref, 'refs/tags/v')

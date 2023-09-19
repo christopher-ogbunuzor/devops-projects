@@ -1,9 +1,9 @@
 ---
 - name: Update apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
 
 - name: Install Java JDK 17
-  apt:
+  ansible.builtin.apt:
     name: openjdk-17-jdk
     state: present

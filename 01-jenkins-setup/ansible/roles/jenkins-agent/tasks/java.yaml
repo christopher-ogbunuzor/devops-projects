@@ -4,6 +4,16 @@
     update_cache: yes
     cache_valid_time: 3600
 
+- name: Install Python 3
+  ansible.builtin.apt:
+    name: python3
+    state: present
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    
 - name: Install Java JDK 17
   ansible.builtin.apt:
     name: openjdk-17-jdk

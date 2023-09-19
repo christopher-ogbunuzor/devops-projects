@@ -151,7 +151,7 @@ jobs:
           echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
 
       - name: Packer Init
-        if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
+        if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'yes'
         run: packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
       # - name: Packer Build

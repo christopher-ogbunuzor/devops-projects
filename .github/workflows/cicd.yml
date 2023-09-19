@@ -132,14 +132,33 @@ jobs:
           # aws-region: ${{ env.AWS_REGION }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Packer Init
+      - name: Check if Jenkins Controller AMI exists
+        id: jenkins_controller_ami_check
         run: |
-          echo $EFS_DNS_NAME
-          packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+          desired_ami_name="jenkins-controller"
+          ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
+          if [[ $ami_names == *"$desired_ami_name"* ]]; then
+            echo "The desired AMI ($desired_ami_name) is in the list."
+            echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
+          else
+            echo "NO ! The desired AMI is not in the list."
+            echo "AMI_IS_PRESENT=no" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Packer Build
-        if: "startsWith(github.ref, 'refs/heads/')"
-        run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+      - name: Check value of variable `AMI_IS_PRESENT`
+        run: |
+          echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
+
+
+
+      # - name: Packer Init
+      #   run: |
+      #     echo $EFS_DNS_NAME
+      #     packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+
+      # - name: Packer Build
+      #   if: "startsWith(github.ref, 'refs/heads/')"
+      #   run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
       # - name: Packer Build - Tags
       #   if: startsWith(github.ref, 'refs/tags/v')

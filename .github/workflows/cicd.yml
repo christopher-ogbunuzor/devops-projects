@@ -137,7 +137,8 @@ jobs:
         run: |
           desired_ami_name="jenkins-controller"
           ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
-          if [[ $ami_names == *"$desired_ami_name"* ]]; then
+          echo "AMI LIST IS : $ami_name_list"
+          if [[ $ami_name_list == *"$desired_ami_name"* ]]; then
             echo "The desired AMI ($desired_ami_name) is in the list."
             echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
           else

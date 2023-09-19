@@ -112,7 +112,7 @@ jobs:
         continue-on-error: false
 
   Changes-Jenkins-AMI: 
-    name: Packer_Jenkins_Controller_Changes
+    name: Changes_Jenkins_AMI
     # needs: ["Terraform-stack-EFS"]
     runs-on: ubuntu-latest
     permissions:

@@ -303,7 +303,7 @@ jobs:
 
       - name: Plan
         id: plan
-        run: terraform plan 
+        run: terraform plan -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}"
         continue-on-error: false
 
       - name: Apply

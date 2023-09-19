@@ -150,19 +150,38 @@ jobs:
         run: |
           echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
 
+      # - name: Packer Init
+      #   # if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
+      #   run: |
+      #     if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+      #       echo "AMI already exist so I wont run packer init"
+      #     else
+      #       echo "I AM ABOUT TO RUN packer init"
+      #       packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+      #     fi
+
       - name: Packer Init
-        # if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
+        if: "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" 
         run: |
-          if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "AMI already exist so I wont run packer init"
-          else
-            echo "I AM ABOUT TO RUN packer init"
-            # packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
-          fi
+          echo "AMI already exist so I wont run packer init"
+          # if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+          #   echo "AMI already exist so I wont run packer init"
+          # else
+          #   echo "I AM ABOUT TO RUN packer init"
+          #   packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+          # fi
 
       # - name: Packer Build
       #   if: "startsWith(github.ref, 'refs/heads/')"
-      #   run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+      #   run: |
+      #     if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+      #       echo "AMI already exist so I wont run packer init"
+      #     else
+      #       echo "I AM ABOUT TO RUN packer build"
+      #       packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+      #     fi
+          
+          
 
       # - name: Packer Build - Tags
       #   if: startsWith(github.ref, 'refs/tags/v')

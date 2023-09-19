@@ -11,7 +11,8 @@ resource "aws_iam_policy" "jenkins_iam_policy" {
         Action = [
           "ssm:GetParameter",
           "ssm:GetParameters",
-          "ssm:GetParametersByPath"
+          "ssm:GetParametersByPath",
+          "kms:Decrypt"
         ]
         Resource = "*"
       }

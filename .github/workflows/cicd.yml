@@ -104,7 +104,8 @@ jobs:
         id: efs_dns_name
         run: |
           EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
-          echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
+          # echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
+          echo "EFS_DNS_NAME::$EFS_DNS_NAME" >> $GITHUB_OUTPUT
           # echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
           echo "$EFS_DNS_NAME"
         continue-on-error: false

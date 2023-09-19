@@ -1,16 +1,16 @@
 ---
 - name: Update apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
     
 - name: Install Python 3
-  apt:
+  ansible.builtin.apt:
     name: python3
     state: present
 
 - name: Install pip
-  apt:
+  ansible.builtin.apt:
     name: python3-pip
     state: present
 
@@ -28,6 +28,6 @@
     executable: pip3
 
 - name: Install Java JDK 17
-  apt:
+  ansible.builtin.apt:
     name: openjdk-11-jdk  # openjdk-17-jre-headless  openjdk-17-jdk
     state: present

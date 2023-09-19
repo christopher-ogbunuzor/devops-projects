@@ -4,6 +4,8 @@ provider "aws" {
 
 module "lb-asg" {
   source        = "../modules/lb-asg"
+
+  # replace subnet ids with the ones u wann use
   subnets       = ["subnet-0b57428ec73b391ba", "subnet-02411abc7bcfdb4d9", "subnet-0b13f4c7427435253"]
   # replace with jenkins controller AMI id or 
   # ideally do this via github actions outputs 

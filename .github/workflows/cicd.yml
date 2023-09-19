@@ -118,7 +118,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      01-jenkins-setup: ${{ steps.filter.outputs.01-jenkins-setup }}
+      jenkins_setup: ${{ steps.filter.outputs.01-jenkins-setup }}
     # defaults:
     #   run:
     #     working-directory: 01-jenkins-setup
@@ -135,7 +135,7 @@ jobs:
   Packer-Jenkins-controller: 
     name: Packer_Jenkins_controller
     needs: ["Terraform-stack-EFS", "Packer-Jenkins-Controller-Changes"]
-    if: ${{ needs.Packer-Jenkins-Controller-Changes.outputs.01-jenkins-setup == 'true' }}
+    if: ${{ needs.Packer-Jenkins-Controller-Changes.outputs.jenkins_setup == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read

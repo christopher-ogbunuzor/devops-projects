@@ -270,7 +270,7 @@ jobs:
 
   Terraform-stack-Lb-ASG-Jenkins-Controller:
     name: Terraform_stack_Lb_ASG_Jenkins_Controller
-    needs: ["Packer-Jenkins-controller"]
+    needs: ["Packer-Jenkins-controller", "Packer-Jenkins-Controller-Changes"]
     runs-on: ubuntu-latest
     environment: test
     defaults:

@@ -27,7 +27,16 @@
     state: latest
     executable: pip3
 
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+    
 - name: Install Java JDK 17
   ansible.builtin.apt:
     name: openjdk-17-jdk  # openjdk-17-jre-headless  openjdk-17-jdk
     state: present
+
+# - name: Install Java JDK 17
+#   ansible.builtin.apt:
+#     name: openjdk-17-jdk  # openjdk-17-jre-headless  openjdk-17-jdk
+#     state: present

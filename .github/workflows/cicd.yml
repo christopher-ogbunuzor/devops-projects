@@ -147,8 +147,7 @@ jobs:
           fi
 
       - name: Check value of variable `AMI_IS_PRESENT`
-        run: |
-          echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
+        run: echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
 
       # - name: Packer Init
       #   # if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
@@ -161,7 +160,7 @@ jobs:
       #     fi
 
       - name: Packer Init
-        if: "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" 
+        if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == yes 
         run: |
           echo "AMI already exist so I wont run packer init"
           # if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then

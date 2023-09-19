@@ -111,7 +111,7 @@ jobs:
           # echo "$EFS_DNS_NAME"
         continue-on-error: false
 
-  Packer-Jenkins-Controller-Changes: 
+  Changes-Jenkins-AMI: 
     name: Packer_Jenkins_Controller_Changes
     # needs: ["Terraform-stack-EFS"]
     runs-on: ubuntu-latest
@@ -138,8 +138,8 @@ jobs:
 
   Packer-Jenkins-controller: 
     name: Packer_Jenkins_controller
-    needs: ["Terraform-stack-EFS", "Packer-Jenkins-Controller-Changes"]
-    if: ${{ needs.Packer-Jenkins-Controller-Changes.outputs.jenkins_setup == 'true' }}
+    needs: ["Terraform-stack-EFS", "Changes-Jenkins-AMI"]
+    if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -270,7 +270,10 @@ jobs:
 
   Terraform-stack-Lb-ASG-Jenkins-Controller:
     name: Terraform_stack_Lb_ASG_Jenkins_Controller
-    needs: ["Packer-Jenkins-controller", "Packer-Jenkins-Controller-Changes"]
+    # if: ${{ github.event_name == 'push' && (github.job == 'Packer-Jenkins-controller' || github.job == 'Changes-Jenkins-AMI') }}
+    # needs: ["Packer-Jenkins-controller", "Changes-Jenkins-AMI"]
+    # if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     environment: test
     defaults:

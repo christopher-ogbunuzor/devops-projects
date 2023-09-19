@@ -272,7 +272,7 @@ jobs:
           fi
 
   Terraform-stack-Lb-ASG:
-    name: Terraform_stack_IAM
+    name: Terraform_stack_Lb_ASG
     needs: ["Packer-Jenkins-controller"]
     runs-on: ubuntu-latest
     environment: test

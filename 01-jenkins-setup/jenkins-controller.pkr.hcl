@@ -11,6 +11,12 @@ packer {
   }
 }
 
+locals {
+  packerstarttime = formatdate("YYYY-MM-DD-hhmm", timestamp())
+  # Also here I believe naming this variable `buildtime` could lead to 
+  # confusion mainly because this is evaluated a 'parsing-time'.
+}
+
 variable "ami_id" {
   type    = string
   default = "ami-0735c191cf914754d"
@@ -27,7 +33,7 @@ locals {
 }
 
 source "amazon-ebs" "jenkins" {
-  ami_name      = "${local.app_name}"
+  ami_name      = "${local.app_name}-${local.packerstarttime}"
   instance_type = "t2.micro"
   region        = "us-west-2"
   availability_zone = "us-west-2a"

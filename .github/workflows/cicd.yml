@@ -118,7 +118,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      jenkins_setup: ${{ steps.filter.outputs.01-jenkins-setup }}
+      jenkins_setup: ${{ steps.filter.outputs.jenkins_setup }}
     # defaults:
     #   run:
     #     working-directory: 01-jenkins-setup
@@ -129,7 +129,7 @@ jobs:
       id: filter
       with:
         filters: |
-          01-jenkins-setup:
+          jenkins_setup:
             - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
 
   Packer-Jenkins-controller: 

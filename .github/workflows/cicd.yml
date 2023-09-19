@@ -183,6 +183,63 @@ jobs:
       #     iteration_id=$(echo "$build" | jq -r '.custom_data.iteration_id')
       #     echo "::set-output name=iteration_id::$iteration_id"
 
+  Packer-Jenkins-agent: 
+    name: Packer_Jenkins_Agent
+    # needs: ["Terraform-stack-EFS"]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 01-jenkins-setup
+    environment: test
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate with AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+          role-session-name: new_github_oidc_role_session
+          # aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Check if Jenkins Agent AMI exists
+        id: jenkins_agent_ami_check
+        run: |
+          desired_ami_name="jenkins-agent"
+          ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
+          echo "AMI LIST IS : $ami_name_list"
+          if [[ $ami_name_list == *"$desired_ami_name"* ]]; then
+            echo "The desired AMI ($desired_ami_name) is in the list."
+            echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
+          else
+            echo "NO ! The desired AMI is not in the list."
+            echo "AMI_IS_PRESENT=no" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check value of variable `AMI_IS_PRESENT`
+        run: echo ${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}
+
+      - name: Packer Init
+        run: |
+          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+            echo "Agent AMI already exist so I wont run packer init"
+          else
+            echo "I AM ABOUT TO RUN packer init for Agent AMI"
+            packer init jenkins-agent.pkr.hcl
+          fi
+
+      - name: Packer Build
+        if: "startsWith(github.ref, 'refs/heads/')"
+        run: |
+          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+            echo "Agent AMI already exist so I wont run packer build"
+          else
+            echo "I AM ABOUT TO RUN packer build Agent AMI"
+            packer build jenkins-agent.pkr.hcl
+          fi
+
   # Terraform-job2:
   #   name: Terraform_job
   #   needs: ["Packer_build_AMI_Job"]

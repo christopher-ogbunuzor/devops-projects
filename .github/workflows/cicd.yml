@@ -143,6 +143,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
+      id-token: write
+      contents: read
     outputs:
       packer_controller_ami_id: ${{ steps.get_ami_id_and_region.outputs.controller_ami_id }}
       packer_controller_ami_region: ${{ steps.get_ami_id_and_region.outputs.controller_region }}

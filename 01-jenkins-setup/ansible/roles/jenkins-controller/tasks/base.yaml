@@ -27,7 +27,7 @@
     state: latest
     executable: pip3
 
-- name: Install Java JDK 17
+- name: Install Java JDK 11
   ansible.builtin.apt:
     name: openjdk-11-jdk  # openjdk-17-jre-headless  openjdk-17-jdk
     state: present

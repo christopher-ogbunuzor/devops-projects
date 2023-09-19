@@ -271,9 +271,10 @@ jobs:
   Terraform-stack-Lb-ASG-Jenkins-Controller:
     name: Terraform_stack_Lb_ASG_Jenkins_Controller
     # if: ${{ github.event_name == 'push' && (github.job == 'Packer-Jenkins-controller' || github.job == 'Changes-Jenkins-AMI') }}
+    needs: ["Packer-Jenkins-controller"]
     # needs: ["Packer-Jenkins-controller", "Changes-Jenkins-AMI"]
     # if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
-    if: ${{ always() }}
+    # if: ${{ always() }} # Not solution as dependency is removed totally
     runs-on: ubuntu-latest
     environment: test
     defaults:

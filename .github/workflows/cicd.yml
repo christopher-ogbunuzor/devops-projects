@@ -124,13 +124,17 @@ jobs:
     #     working-directory: 01-jenkins-setup
 
     steps:
-    - name: Dorny Paths Filter
-      uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          jenkins_setup:
-            - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Dorny Paths Filter
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            jenkins_setup:
+              - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
 
   Packer-Jenkins-controller: 
     name: Packer_Jenkins_controller

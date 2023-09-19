@@ -111,21 +111,62 @@ jobs:
           # echo "$EFS_DNS_NAME"
         continue-on-error: false
 
+  Packer-Jenkins-Controller-Changes: 
+    name: Packer_Jenkins_Controller_Changes
+    # needs: ["Terraform-stack-EFS"]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      01-jenkins-setup: ${{ steps.filter.outputs.01-jenkins-setup }}
+    # defaults:
+    #   run:
+    #     working-directory: 01-jenkins-setup
+
+    steps:
+    - name: Dorny Paths Filter
+      uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          01-jenkins-setup:
+            - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
+
   Packer-Jenkins-controller: 
     name: Packer_Jenkins_controller
-    needs: ["Terraform-stack-EFS"]
+    needs: ["Terraform-stack-EFS", "Packer-Jenkins-Controller-Changes"]
+    if: ${{ needs.Packer-Jenkins-Controller-Changes.outputs.01-jenkins-setup == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     outputs:
       packer_controller_ami_id: ${{ steps.get_ami_id_and_region.outputs.controller_ami_id }}
       packer_controller_ami_region: ${{ steps.get_ami_id_and_region.outputs.controller_region }}
+      # 01-jenkins-setup: ${{ steps.filter.outputs.01-jenkins-setup }}
     defaults:
       run:
         working-directory: 01-jenkins-setup
     environment: test
-    
+
     steps:
+      # - name: Dorny Paths Filter
+      #   uses: dorny/paths-filter@v2
+      #   id: filter
+      #   with:
+      #     filters: |
+      #       01-jenkins-setup:
+      #         - '.github/workflows/**'
+
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      # - name: Dorny Paths Filter
+      #   uses: dorny/paths-filter@v2
+      #   id: filter
+      #   with:
+      #     filters: |
+      #       01-jenkins-setup:
+      #         - '.github/workflows/**'
 
       - name: Authenticate with AWS
         uses: aws-actions/configure-aws-credentials@v2
@@ -135,68 +176,20 @@ jobs:
           # aws-region: ${{ env.AWS_REGION }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Check if Jenkins Controller AMI exists
-        id: jenkins_controller_ami_check
-        run: |
-          desired_ami_name="jenkins-controller"
-          ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
-          echo "AMI LIST IS : $ami_name_list"
-          if [[ $ami_name_list == *"$desired_ami_name"* ]]; then
-            echo "The desired AMI ($desired_ami_name) is in the list."
-            echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
-          else
-            echo "NO ! The desired AMI is not in the list."
-            echo "AMI_IS_PRESENT=no" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check value of variable `AMI_IS_PRESENT`
-        run: echo ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}
-
       - name: Packer Init
-        # if: ${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }} == 'no'
-        run: |
-          if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "AMI already exist so I wont run packer init"
-          else
-            echo "I AM ABOUT TO RUN packer init"
-            packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
-          fi
+        run: packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
       - name: Packer Build
         if: "startsWith(github.ref, 'refs/heads/')"
-        run: |
-          if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "AMI already exist so I wont run packer build"
-          else
-            echo "I AM ABOUT TO RUN packer build"
-            packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
-          fi
+        run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
         continue-on-error: false
 
       - name: Retrieve packer AMI ID
         id: get_ami_id_and_region
         run: |
-          if [[ "${{ steps.jenkins_controller_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "AMI already exist so I wont run packer build"
-          else
             echo "I AM ABOUT TO retrieve AMI id and region"
-            # ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)
-            # region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)
             echo "controller_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
             echo "controller_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
-          fi
-
-      # - name: Packer Build - Tags
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   run: HCP_PACKER_BUILD_FINGERPRINT=$(date +'%m%d%YT%H%M%S') packer build .
-
-      # - name: Get HCP Packer Iteration ID from Packer Manifest
-      #   id: hcp
-      #   run: |
-      #     last_run_uuid=$(jq -r '.last_run_uuid' "./packer_manifest.json")
-      #     build=$(jq -r '.builds[] | select(.packer_run_uuid == "'"$last_run_uuid"'")' "./packer_manifest.json")
-      #     iteration_id=$(echo "$build" | jq -r '.custom_data.iteration_id')
-      #     echo "::set-output name=iteration_id::$iteration_id"
 
   Packer-Jenkins-agent: 
     name: Packer_Jenkins_Agent
@@ -305,7 +298,7 @@ jobs:
 
       - name: Apply
         id: apply
-        run: terraform apply --auto-approve
+        run: terraform apply -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}" --auto-approve
         continue-on-error: false
 
   Terraform-stack-Jenkins-Agent:
@@ -345,42 +338,3 @@ jobs:
         run: terraform apply --auto-approve
         continue-on-error: false
 
-  # Terraform-job2:
-  #   name: Terraform_job
-  #   needs: ["Packer_build_AMI_Job"]
-  #   runs-on: ubuntu-latest
-  #   environment: test
-  #   defaults:
-  #     run:
-  #       working-directory: terraform
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v3
-
-  #     - name: Authenticate with AWS
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-  #         role-session-name: new_github_oidc_role_session
-  #         # aws-region: ${{ env.AWS_REGION }}
-  #         aws-region: ${{ vars.AWS_REGION }}
-
-  #     - name: Terraform setup
-  #       uses: hashicorp/setup-terraform@v1
-        
-  #     - name: Init
-  #       id: init
-  #       run: terraform init
-
-  #     - name: Plan
-  #       id: plan
-  #       run: terraform plan 
-  #       continue-on-error: false
-
-  #     - name: Apply
-  #       id: apply
-  #       run: terraform apply --auto-approve
-  #       continue-on-error: false
-
-
-     

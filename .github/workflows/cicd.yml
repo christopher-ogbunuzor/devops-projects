@@ -1,350 +1,350 @@
-name: Build and Deploy
+# name: Build and Deploy
 
-on:
-  push:
-    tags: ["v[0-9].[0-9]+.[0-9]+"]
-    # paths:
-    #   - 'terraform'
-    branches:
-      # - "development"
-      # - "staging"
-      - "main" 
+# on:
+#   push:
+#     tags: ["v[0-9].[0-9]+.[0-9]+"]
+#     # paths:
+#     #   - 'terraform'
+#     branches:
+#       # - "development"
+#       # - "staging"
+#       - "main" 
 
-# env:
-#   HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+# # env:
+# #   HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
 
   
-  # AWS_REGION : "us-east-1" 
-  # NO NEED FOR 'AWS_REGION' AS I HAVE SPECIFIED 
-  # THIS IN GITHUB ENVIRONMENT FOR THIS REPO
+#   # AWS_REGION : "us-east-1" 
+#   # NO NEED FOR 'AWS_REGION' AS I HAVE SPECIFIED 
+#   # THIS IN GITHUB ENVIRONMENT FOR THIS REPO
 
-permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
+# permissions:
+#   id-token: write   # This is required for requesting the JWT
+#   contents: read    # This is required for actions/checkout
 
 
-jobs:
-  Terraform-stack-IAM:
-    name: Terraform_stack_IAM
-    runs-on: ubuntu-latest
-    environment: test
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup/terraform/iam
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+# jobs:
+#   Terraform-stack-IAM:
+#     name: Terraform_stack_IAM
+#     runs-on: ubuntu-latest
+#     environment: test
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup/terraform/iam
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform setup
-        uses: hashicorp/setup-terraform@v1
+#       - name: Terraform setup
+#         uses: hashicorp/setup-terraform@v1
         
-      - name: Init
-        id: init
-        run: terraform init
+#       - name: Init
+#         id: init
+#         run: terraform init
 
-      - name: Plan
-        id: plan
-        run: terraform plan 
-        continue-on-error: false
+#       - name: Plan
+#         id: plan
+#         run: terraform plan 
+#         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply --auto-approve
-        continue-on-error: false
+#       - name: Apply
+#         id: apply
+#         run: terraform apply --auto-approve
+#         continue-on-error: false
 
-  Terraform-stack-EFS:
-    name: Terraform_stack_EFS
-    runs-on: ubuntu-latest
-    outputs:
-      efs_dns_name_mount: ${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}
-    environment: test
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup/terraform/efs
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#   Terraform-stack-EFS:
+#     name: Terraform_stack_EFS
+#     runs-on: ubuntu-latest
+#     outputs:
+#       efs_dns_name_mount: ${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}
+#     environment: test
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup/terraform/efs
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform setup
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
+#       - name: Terraform setup
+#         uses: hashicorp/setup-terraform@v1
+#         with:
+#           terraform_wrapper: false
         
-      - name: Init
-        id: init
-        run: terraform init
+#       - name: Init
+#         id: init
+#         run: terraform init
 
-      - name: Plan
-        id: plan
-        run: terraform plan 
-        continue-on-error: false
+#       - name: Plan
+#         id: plan
+#         run: terraform plan 
+#         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply --auto-approve
-        continue-on-error: false
+#       - name: Apply
+#         id: apply
+#         run: terraform apply --auto-approve
+#         continue-on-error: false
 
-      - name: EFS_DNS_NAME
-        id: efs_dns_name
-        run: |
-          # EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
-          # echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
+#       - name: EFS_DNS_NAME
+#         id: efs_dns_name
+#         run: |
+#           # EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
+#           # echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
 
-          echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
+#           echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
 
-          # echo "$EFS_DNS_NAME"
-        continue-on-error: false
+#           # echo "$EFS_DNS_NAME"
+#         continue-on-error: false
 
-  Changes-Jenkins-AMI: 
-    name: Changes_Jenkins_AMI
-    # needs: ["Terraform-stack-EFS"]
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    outputs:
-      jenkins_setup: ${{ steps.filter.outputs.jenkins_setup }}
-    # defaults:
-    #   run:
-    #     working-directory: 01-jenkins-setup
+#   Changes-Jenkins-AMI: 
+#     name: Changes_Jenkins_AMI
+#     # needs: ["Terraform-stack-EFS"]
+#     runs-on: ubuntu-latest
+#     permissions:
+#       pull-requests: read
+#     outputs:
+#       jenkins_setup: ${{ steps.filter.outputs.jenkins_setup }}
+#     # defaults:
+#     #   run:
+#     #     working-directory: 01-jenkins-setup
 
-    steps:
+#     steps:
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Dorny Paths Filter
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            jenkins_setup:
-              - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
+#       - name: Dorny Paths Filter
+#         uses: dorny/paths-filter@v2
+#         id: filter
+#         with:
+#           filters: |
+#             jenkins_setup:
+#               - '01-jenkins-setup/ansible/roles/jenkins-controller/**'
 
-  Packer-Jenkins-controller: 
-    name: Packer_Jenkins_controller
-    needs: ["Terraform-stack-EFS", "Changes-Jenkins-AMI"]
-    if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-      id-token: write
-      contents: read
-    outputs:
-      packer_controller_ami_id: ${{ steps.get_ami_id_and_region.outputs.controller_ami_id }}
-      packer_controller_ami_region: ${{ steps.get_ami_id_and_region.outputs.controller_region }}
-      # 01-jenkins-setup: ${{ steps.filter.outputs.01-jenkins-setup }}
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup
-    environment: test
+#   Packer-Jenkins-controller: 
+#     name: Packer_Jenkins_controller
+#     needs: ["Terraform-stack-EFS", "Changes-Jenkins-AMI"]
+#     if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
+#     runs-on: ubuntu-latest
+#     permissions:
+#       pull-requests: read
+#       id-token: write
+#       contents: read
+#     outputs:
+#       packer_controller_ami_id: ${{ steps.get_ami_id_and_region.outputs.controller_ami_id }}
+#       packer_controller_ami_region: ${{ steps.get_ami_id_and_region.outputs.controller_region }}
+#       # 01-jenkins-setup: ${{ steps.filter.outputs.01-jenkins-setup }}
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup
+#     environment: test
 
-    steps:
-      # - name: Dorny Paths Filter
-      #   uses: dorny/paths-filter@v2
-      #   id: filter
-      #   with:
-      #     filters: |
-      #       01-jenkins-setup:
-      #         - '.github/workflows/**'
+#     steps:
+#       # - name: Dorny Paths Filter
+#       #   uses: dorny/paths-filter@v2
+#       #   id: filter
+#       #   with:
+#       #     filters: |
+#       #       01-jenkins-setup:
+#       #         - '.github/workflows/**'
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      # - name: Dorny Paths Filter
-      #   uses: dorny/paths-filter@v2
-      #   id: filter
-      #   with:
-      #     filters: |
-      #       01-jenkins-setup:
-      #         - '.github/workflows/**'
+#       # - name: Dorny Paths Filter
+#       #   uses: dorny/paths-filter@v2
+#       #   id: filter
+#       #   with:
+#       #     filters: |
+#       #       01-jenkins-setup:
+#       #         - '.github/workflows/**'
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Packer Init
-        run: packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+#       - name: Packer Init
+#         run: packer init -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
 
-      - name: Packer Build
-        if: "startsWith(github.ref, 'refs/heads/')"
-        run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
-        continue-on-error: false
+#       - name: Packer Build
+#         if: "startsWith(github.ref, 'refs/heads/')"
+#         run: packer build -var "efs_mount_point=${{ needs.Terraform-stack-EFS.outputs.efs_dns_name_mount }}" jenkins-controller.pkr.hcl
+#         continue-on-error: false
 
-      - name: Retrieve packer AMI ID
-        id: get_ami_id_and_region
-        run: |
-            echo "I AM ABOUT TO retrieve AMI id and region"
-            echo "controller_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
-            echo "controller_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
+#       - name: Retrieve packer AMI ID
+#         id: get_ami_id_and_region
+#         run: |
+#             echo "I AM ABOUT TO retrieve AMI id and region"
+#             echo "controller_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
+#             echo "controller_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
 
-  Packer-Jenkins-agent: 
-    name: Packer_Jenkins_Agent
-    needs: ["Terraform-stack-IAM"]
-    runs-on: ubuntu-latest
-    outputs:
-      packer_agent_ami_id: ${{ steps.get_ami_id_and_region.outputs.agent_ami_id }}
-      packer_agent_ami_region: ${{ steps.get_ami_id_and_region.outputs.agent_region }}
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup
-    environment: test
+#   Packer-Jenkins-agent: 
+#     name: Packer_Jenkins_Agent
+#     needs: ["Terraform-stack-IAM"]
+#     runs-on: ubuntu-latest
+#     outputs:
+#       packer_agent_ami_id: ${{ steps.get_ami_id_and_region.outputs.agent_ami_id }}
+#       packer_agent_ami_region: ${{ steps.get_ami_id_and_region.outputs.agent_region }}
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup
+#     environment: test
     
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Check if Jenkins Agent AMI exists
-        id: jenkins_agent_ami_check
-        run: |
-          desired_ami_name="jenkins-agent"
-          ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
-          echo "AMI LIST IS : $ami_name_list"
-          if [[ $ami_name_list == *"$desired_ami_name"* ]]; then
-            echo "The desired AMI ($desired_ami_name) is in the list."
-            echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
-          else
-            echo "NO ! The desired AMI is not in the list."
-            echo "AMI_IS_PRESENT=no" >> $GITHUB_OUTPUT
-          fi
+#       - name: Check if Jenkins Agent AMI exists
+#         id: jenkins_agent_ami_check
+#         run: |
+#           desired_ami_name="jenkins-agent"
+#           ami_name_list=$(aws ec2 describe-images --region us-west-2 --owners self | jq -r '.Images[].Name')
+#           echo "AMI LIST IS : $ami_name_list"
+#           if [[ $ami_name_list == *"$desired_ami_name"* ]]; then
+#             echo "The desired AMI ($desired_ami_name) is in the list."
+#             echo "AMI_IS_PRESENT=yes" >> $GITHUB_OUTPUT
+#           else
+#             echo "NO ! The desired AMI is not in the list."
+#             echo "AMI_IS_PRESENT=no" >> $GITHUB_OUTPUT
+#           fi
 
-      - name: Check value of variable `AMI_IS_PRESENT`
-        run: echo ${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}
+#       - name: Check value of variable `AMI_IS_PRESENT`
+#         run: echo ${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}
 
-      - name: Packer Init
-        run: |
-          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "Agent AMI already exist so I wont run packer init"
-          else
-            echo "I AM ABOUT TO RUN packer init for Agent AMI"
-            packer init jenkins-agent.pkr.hcl
-          fi
+#       - name: Packer Init
+#         run: |
+#           if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+#             echo "Agent AMI already exist so I wont run packer init"
+#           else
+#             echo "I AM ABOUT TO RUN packer init for Agent AMI"
+#             packer init jenkins-agent.pkr.hcl
+#           fi
 
-      - name: Packer Build
-        if: "startsWith(github.ref, 'refs/heads/')"
-        run: |
-          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "Agent AMI already exist so I wont run packer build"
-          else
-            echo "I AM ABOUT TO RUN packer build Agent AMI"
-            packer build jenkins-agent.pkr.hcl
-          fi
+#       - name: Packer Build
+#         if: "startsWith(github.ref, 'refs/heads/')"
+#         run: |
+#           if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+#             echo "Agent AMI already exist so I wont run packer build"
+#           else
+#             echo "I AM ABOUT TO RUN packer build Agent AMI"
+#             packer build jenkins-agent.pkr.hcl
+#           fi
 
-      - name: Retrieve packer AMI ID
-        id: get_ami_id_and_region
-        run: |
-          if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
-            echo "Agent AMI already exist so I wont retrieve AMI id and region"
-          else
-            echo "I AM ABOUT TO RUN retrieve AMI id and region"
-            # ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)
-            # region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)
-            echo "agent_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
-            echo "agent_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
-          fi
+#       - name: Retrieve packer AMI ID
+#         id: get_ami_id_and_region
+#         run: |
+#           if [[ "${{ steps.jenkins_agent_ami_check.outputs.AMI_IS_PRESENT }}" == "yes" ]]; then
+#             echo "Agent AMI already exist so I wont retrieve AMI id and region"
+#           else
+#             echo "I AM ABOUT TO RUN retrieve AMI id and region"
+#             # ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)
+#             # region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)
+#             echo "agent_ami_id=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 2)" >> $GITHUB_OUTPUT
+#             echo "agent_region=$(cat manifest.json | jq -r '.builds[].artifact_id' | cut -d ':' -f 1)" >> $GITHUB_OUTPUT
+#           fi
 
-  Terraform-stack-Lb-ASG-Jenkins-Controller:
-    name: Terraform_stack_Lb_ASG_Jenkins_Controller
-    # if: ${{ github.event_name == 'push' && (github.job == 'Packer-Jenkins-controller' || github.job == 'Changes-Jenkins-AMI') }}
-    needs: ["Packer-Jenkins-controller"]
-    # needs: ["Packer-Jenkins-controller", "Changes-Jenkins-AMI"]
-    # if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
-    # if: ${{ always() }} # Not solution as dependency is removed totally
-    runs-on: ubuntu-latest
-    environment: test
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup/terraform/lb-asg
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#   Terraform-stack-Lb-ASG-Jenkins-Controller:
+#     name: Terraform_stack_Lb_ASG_Jenkins_Controller
+#     # if: ${{ github.event_name == 'push' && (github.job == 'Packer-Jenkins-controller' || github.job == 'Changes-Jenkins-AMI') }}
+#     needs: ["Packer-Jenkins-controller"]
+#     # needs: ["Packer-Jenkins-controller", "Changes-Jenkins-AMI"]
+#     # if: ${{ needs.Changes-Jenkins-AMI.outputs.jenkins_setup == 'true' }}
+#     # if: ${{ always() }} # Not solution as dependency is removed totally
+#     runs-on: ubuntu-latest
+#     environment: test
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup/terraform/lb-asg
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform setup
-        uses: hashicorp/setup-terraform@v1
+#       - name: Terraform setup
+#         uses: hashicorp/setup-terraform@v1
         
-      - name: Init
-        id: init
-        run: terraform init
+#       - name: Init
+#         id: init
+#         run: terraform init
 
-      - name: Plan
-        id: plan
-        run: terraform plan -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}"
-        continue-on-error: false
+#       - name: Plan
+#         id: plan
+#         run: terraform plan -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}"
+#         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}" --auto-approve
-        continue-on-error: false
+#       - name: Apply
+#         id: apply
+#         run: terraform apply -var "jenkins_controller_ami_id=${{ needs.Packer-Jenkins-controller.outputs.packer_controller_ami_id }}" --auto-approve
+#         continue-on-error: false
 
-  Terraform-stack-Jenkins-Agent:
-    name: Terraform_stack_Jenkins_Agent
-    needs: ["Packer-Jenkins-agent"]
-    runs-on: ubuntu-latest
-    environment: test
-    defaults:
-      run:
-        working-directory: 01-jenkins-setup/terraform/agent
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+#   Terraform-stack-Jenkins-Agent:
+#     name: Terraform_stack_Jenkins_Agent
+#     needs: ["Packer-Jenkins-agent"]
+#     runs-on: ubuntu-latest
+#     environment: test
+#     defaults:
+#       run:
+#         working-directory: 01-jenkins-setup/terraform/agent
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
 
-      - name: Authenticate with AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
-          role-session-name: new_github_oidc_role_session
-          # aws-region: ${{ env.AWS_REGION }}
-          aws-region: ${{ vars.AWS_REGION }}
+#       - name: Authenticate with AWS
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           role-to-assume: arn:aws:iam::708398767885:role/github_OIDC_new
+#           role-session-name: new_github_oidc_role_session
+#           # aws-region: ${{ env.AWS_REGION }}
+#           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform setup
-        uses: hashicorp/setup-terraform@v1
+#       - name: Terraform setup
+#         uses: hashicorp/setup-terraform@v1
         
-      - name: Init
-        id: init
-        run: terraform init
+#       - name: Init
+#         id: init
+#         run: terraform init
 
-      - name: Plan
-        id: plan
-        run: terraform plan 
-        continue-on-error: false
+#       - name: Plan
+#         id: plan
+#         run: terraform plan 
+#         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply --auto-approve
-        continue-on-error: false
+#       - name: Apply
+#         id: apply
+#         run: terraform apply --auto-approve
+#         continue-on-error: false
 

@@ -18,3 +18,11 @@ Refer [Jenkins Setup Using AWS Autoscaling Group](https://devopscube.com/jenkins
 The terraform deployment is laid down in the following order
 - IAM role
 - EFS
+- Jenkins EC2 Agent
+- Load balancer + ASG
+
+## Future Work
+- Use close/private network
+- Implement SSO, OpenVPN for accessing Jenkins
+- Implement identity such as okta
+- Bring to production grade

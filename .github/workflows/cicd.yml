@@ -55,16 +55,21 @@ jobs:
         run: terraform plan 
         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply --auto-approve
+      # - name: Apply
+      #   id: apply
+      #   run: terraform apply --auto-approve
+      #   continue-on-error: false
+
+      - name: Destroy
+        id: destroy
+        run: terraform destroy --auto-approve
         continue-on-error: false
 
   Terraform-stack-EFS:
     name: Terraform_stack_EFS
     runs-on: ubuntu-latest
-    outputs:
-      efs_dns_name_mount: ${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}
+    # outputs:
+    #   efs_dns_name_mount: ${{ steps.efs_dns_name.outputs.EFS_DNS_NAME }}
     environment: test
     defaults:
       run:
@@ -95,21 +100,26 @@ jobs:
         run: terraform plan 
         continue-on-error: false
 
-      - name: Apply
-        id: apply
-        run: terraform apply --auto-approve
+      # - name: Apply
+      #   id: apply
+      #   run: terraform apply --auto-approve
+      #   continue-on-error: false
+
+      - name: Destroy
+        id: destroy
+        run: terraform destroy --auto-approve
         continue-on-error: false
 
-      - name: EFS_DNS_NAME
-        id: efs_dns_name
-        run: |
-          # EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
-          # echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
+      # - name: EFS_DNS_NAME
+      #   id: efs_dns_name
+      #   run: |
+      #     # EFS_DNS_NAME=$(terraform output -raw efs_dns_name)
+      #     # echo "::set-output name=EFS_DNS_NAME::$EFS_DNS_NAME"
 
-          echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
+      #     echo "EFS_DNS_NAME=$(terraform output -raw efs_dns_name)" >> $GITHUB_OUTPUT
 
-          # echo "$EFS_DNS_NAME"
-        continue-on-error: false
+      #     # echo "$EFS_DNS_NAME"
+      #   continue-on-error: false
 
   Changes-Jenkins-AMI: 
     name: Changes_Jenkins_AMI
